@@ -1,7 +1,67 @@
 <html>
+<head>
+  <title>Summarized Text Popup</title>
+  <style>
+    #summaryPopup {
+      display: none; /* Initially hide the popup */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 20px;
+      z-index: 1000;
+    }
+    #overlay {
+      display: none; /* Initially hide the overlay */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+  </style>
+</head>
 <body>
   <h3>Summarized Text</h3>
-  <div id="summary"></div>
-  <script src="./utils/popup.js"></script>
+  <div id="summaryPopup">
+    <h4>Summary</h4>
+    <div id="summary"></div>
+    <button id="closePopup">Close</button>
+  </div>
+  <div id="overlay"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const summaryPopup = document.getElementById("summaryPopup");
+      const overlay = document.getElementById("overlay");
+      const closePopup = document.getElementById("closePopup");
+
+      // Listener for messages from background or content script
+      chrome.runtime.onMessage.addListener((message) => {
+        if (message.action === "displaySummary") {
+          try {
+            document.getElementById("summary").innerText = message.summary;
+            // Show the popup and overlay when the message is received
+            summaryPopup.style.display = "block";
+            overlay.style.display = "block";
+          } catch (err) {
+            console.error("Error updating summary:", err);
+          }
+        } else {
+          console.log("Message action failed to validate in #popup.js");
+        }
+      });
+
+      // Close button functionality
+      closePopup.addEventListener('click', () => {
+        summaryPopup.style.display = "none";
+        overlay.style.display = "none";
+      });
+    });
+  </script>
 </body>
 </html>
